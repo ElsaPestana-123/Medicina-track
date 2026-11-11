@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Organiza tus materias y calcula cuánto necesitas para aprobar." />
+    <title>Mi progreso académico</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Inicio">
+        <span class="brand-mark">✚</span>
+        <span>MedTrack</span>
+      </a>
+      <div class="topbar-actions">
+        <span class="semester-label">Planificador académico</span>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Activar modo oscuro">
+          <span class="theme-icon" aria-hidden="true">☾</span>
+          <span class="theme-label">Modo oscuro</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Formación clínica, bajo control</p>
+          <h1>Organiza tu carrera de Medicina.</h1>
+          <p class="hero-copy">
+            Registra tus materias, actividades y evaluaciones para conocer tu progreso en cada etapa.
+          </p>
+        </div>
+      </section>
+
+      <section class="summary-grid" aria-label="Resumen académico">
+        <article class="summary-card">
+          <span class="summary-icon purple">▦</span>
+          <div>
+            <span class="summary-label">Materias</span>
+            <strong id="subject-count">0</strong>
+          </div>
+        </article>
+        <article class="summary-card">
+          <span class="summary-icon blue">◒</span>
+          <div>
+            <span class="summary-label">Actividades registradas</span>
+            <strong id="activity-count">0</strong>
+          </div>
+        </article>
+        <article class="summary-card">
+          <span class="summary-icon green">↗</span>
+          <div>
+            <span class="summary-label">Promedio general</span>
+            <strong id="general-average">—</strong>
+          </div>
+        </article>
+      </section>
+
+      <section class="content-header">
+        <div>
+          <h2>Mis materias</h2>
+          <p>Agrega una materia para comenzar a registrar tus notas.</p>
+        </div>
+        <button class="button button-primary" id="add-subject-button" type="button">
+          <span aria-hidden="true">+</span> Nueva materia
+        </button>
+      </section>
+
+      <section id="subjects-list" class="subjects-list" aria-live="polite"></section>
+
+      <section id="empty-state" class="empty-state">
+        <div class="empty-icon">✦</div>
+        <h3>Aún no tienes materias</h3>
+        <p>Agrega tu primera materia y empieza a llevar el control de tu semestre.</p>
+        <button class="button button-secondary" id="empty-add-button" type="button">Agregar materia</button>
+      </section>
+    </main>
+
+    <dialog id="subject-dialog" class="subject-dialog">
+      <form method="dialog" id="subject-form">
+        <button class="dialog-close" value="cancel" aria-label="Cerrar">×</button>
+        <p class="eyebrow">Nueva materia</p>
+        <h2>Configura tu materia</h2>
+        <label for="subject-name">Nombre de la materia</label>
+        <input id="subject-name" name="name" type="text" placeholder="Ej. Matemáticas" required maxlength="60" />
+        <label for="study-year">Año de la carrera</label>
+        <select id="study-year" name="year" required>
+          <option value="1">1.er año</option>
+          <option value="2">2.º año</option>
+          <option value="3">3.er año</option>
+          <option value="4">4.º año</option>
+          <option value="5">5.º año</option>
+          <option value="6">6.º año</option>
+        </select>
+        <label for="passing-grade">Nota mínima para aprobar</label>
+        <div class="input-with-suffix">
+          <input id="passing-grade" name="passingGrade" type="number" min="0" max="20" step="0.1" value="10" required />
+          <span>/ 20</span>
+        </div>
+        <label for="honor-grade">Nota mínima para el cuadro de honor</label>
+        <div class="input-with-suffix">
+          <input id="honor-grade" name="honorGrade" type="number" min="0" max="20" step="0.1" value="18" required />
+          <span>/ 20</span>
+        </div>
+        <button class="button button-primary dialog-submit" value="default">Crear materia</button>
+      </form>
+    </dialog>
+
+    <template id="subject-template">
+      <article class="subject-card">
+        <div class="subject-heading">
+          <div>
+            <span class="subject-kicker subject-year"></span>
+            <h3 class="subject-name"></h3>
+          </div>
+          <button class="icon-button delete-subject" type="button" aria-label="Eliminar materia">⌫</button>
+        </div>
+        <div class="grade-overview">
+          <div class="grade-main">
+            <span class="summary-label">Nota acumulada</span>
+            <strong class="current-grade">0.0</strong><span class="grade-scale">/ 20</span>
+          </div>
+          <div class="needed-grade">
+            <span class="summary-label">Necesitas en lo restante</span>
+            <strong class="remaining-grade">—</strong>
+          </div>
+          <div class="progress-track"><span class="progress-bar"></span></div>
+        </div>
+        <div class="subject-meta">
+          <span class="completion-label"></span>
+          <span class="passing-label"></span>
+          <label class="honor-setting">
+            <span>Cuadro de honor desde</span>
+            <input class="honor-grade-input" type="number" min="0" max="20" step="0.1" aria-label="Nota mínima para cuadro de honor" />
+          </label>
+        </div>
+        <div class="activities-heading">
+          <h4>Actividades</h4>
+          <button class="add-activity button button-small" type="button">+ Actividad</button>
+        </div>
+        <div class="activities-list"></div>
+        <p class="activities-empty">Todavía no hay actividades. Añade la primera para calcular tu progreso.</p>
+      </article>
+    </template>
+
+    <template id="activity-template">
+      <div class="activity-row">
+        <input class="activity-name" type="text" placeholder="Nombre de actividad" aria-label="Nombre de actividad" maxlength="60" />
+        <label class="compact-input">
+          <input class="activity-grade" type="number" min="0" max="20" step="0.1" placeholder="—" aria-label="Nota" />
+          <span>nota</span>
+        </label>
+        <label class="compact-input">
+          <input class="activity-weight" type="number" min="0" max="100" step="1" placeholder="0" aria-label="Porcentaje" />
+          <span>%</span>
+        </label>
+        <button class="activity-done button button-small" type="button">Listo</button>
+        <button class="icon-button delete-activity" type="button" aria-label="Eliminar actividad">×</button>
+      </div>
+    </template>
+  </body>
+</html>

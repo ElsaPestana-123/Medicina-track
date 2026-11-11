@@ -198,6 +198,7 @@ function render() {
     yearSection.className = "year-section";
     yearSection.innerHTML = `<div class="year-heading"><span class="year-number">${year}</span><h2>${yearLabel(year)}</h2></div><div class="year-subjects"></div>`;
     const yearSubjects = yearSection.querySelector(".year-subjects");
+    subjectsList.append(yearSection);
     subjects.filter((subject) => (subject.year || 1) === year).forEach((subject) => {
     const card = document.querySelector("#subject-template").content.cloneNode(true);
     const cardElement = card.querySelector(".subject-card");
@@ -241,7 +242,6 @@ function render() {
     yearSubjects.append(card);
     updateSubjectSummary(subject);
     });
-    subjectsList.append(yearSection);
   });
   updateGlobalSummary();
 }

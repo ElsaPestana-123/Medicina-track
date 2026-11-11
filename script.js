@@ -165,7 +165,7 @@ function updateSubjectSummary(subject) {
   honorLabel.textContent = calculation.currentPoints >= subject.honorGrade
     ? "★ Cuadro de honor desde"
     : "Cuadro de honor desde";
-  card.querySelector(".progress-bar").style.width = `${Math.min(100, calculation.currentPoints * 5)}%`;
+  card.querySelector(".progress-bar").style.width = `${Math.min(100, calculation.completedWeight)}%`;
 }
 
 function render() {

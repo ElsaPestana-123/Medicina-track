@@ -131,6 +131,18 @@ function updateActivity(subject, activity, field, value) {
 }
 
 function setActivityEditing(subject, activity, editing) {
+  if (!editing) {
+    const row = document.querySelector(`[data-activity-id="${activity.id}"]`);
+    if (row) {
+      activity.name = row.querySelector(".activity-name").value.trim();
+      activity.grade = row.querySelector(".activity-grade").value === ""
+        ? ""
+        : Number(row.querySelector(".activity-grade").value);
+      activity.weight = row.querySelector(".activity-weight").value === ""
+        ? ""
+        : Number(row.querySelector(".activity-weight").value);
+    }
+  }
   activity.editing = editing;
   saveSubjects();
   render();
@@ -141,9 +153,16 @@ function setActivityEditing(subject, activity, editing) {
 }
 
 function getCalculation(subject) {
-  const completed = subject.activities.filter((activity) => Number.isFinite(Number(activity.grade)) && activity.grade !== "");
-  const completedWeight = completed.reduce((sum, activity) => sum + Number(activity.weight || 0), 0);
-  const currentPoints = completed.reduce((sum, activity) => sum + Number(activity.grade) * Number(activity.weight || 0) / 100, 0);
+  const completed = subject.activities.filter((activity) => {
+    const grade = Number(activity.grade);
+    const weight = Number(activity.weight);
+    return activity.grade !== "" && activity.weight !== ""
+      && Number.isFinite(grade) && Number.isFinite(weight) && weight > 0;
+  });
+  const completedWeight = completed.reduce((sum, activity) => sum + Number(activity.weight), 0);
+  const currentPoints = completed.reduce((sum, activity) => {
+    return sum + Number(activity.grade) * Number(activity.weight) / 100;
+  }, 0);
   const remainingWeight = Math.max(0, 100 - completedWeight);
   const needed = remainingWeight === 0 ? null : (subject.passingGrade - currentPoints) * 100 / remainingWeight;
   return { completedWeight, currentPoints, remainingWeight, needed };

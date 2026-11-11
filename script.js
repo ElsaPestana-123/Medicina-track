@@ -57,11 +57,13 @@ function normalizeSubject(subject) {
     scaleVersion: 20,
     year: Number(subject.year) || 1,
     passingGrade: legacyHundredScale ? savedPassingGrade / 5 : legacyTenScale ? savedPassingGrade * 2 : savedPassingGrade || 10,
-    honorGrade: legacyHundredScale
-      ? Number(subject.honorGrade || 90) / 5
-      : legacyTenScale
-        ? Number(subject.honorGrade || 9) * 2
-        : Number(subject.honorGrade) || 18,
+    honorGrade: subject.honorGrade === "" || subject.honorGrade == null
+      ? null
+      : legacyHundredScale
+        ? Number(subject.honorGrade) / 5
+        : legacyTenScale
+          ? Number(subject.honorGrade) * 2
+          : Number(subject.honorGrade),
     activities: Array.isArray(subject.activities)
       ? subject.activities.map((activity) => ({
         ...activity,
@@ -80,7 +82,7 @@ function openSubjectDialog() {
   subjectForm.reset();
   document.querySelector("#study-year").value = 1;
   document.querySelector("#passing-grade").value = 10;
-  document.querySelector("#honor-grade").value = 18;
+  document.querySelector("#honor-grade").value = "";
   subjectDialog.showModal();
   document.querySelector("#subject-name").focus();
 }
@@ -92,7 +94,7 @@ function createSubject(event) {
     id: crypto.randomUUID(),
     name: formData.get("name").trim(),
     passingGrade: Number(formData.get("passingGrade")),
-    honorGrade: Number(formData.get("honorGrade")),
+    honorGrade: formData.get("honorGrade") === "" ? null : Number(formData.get("honorGrade")),
     year: Number(formData.get("year")),
     scaleVersion: 20,
     activities: [],
@@ -179,9 +181,9 @@ function updateSubjectSummary(subject) {
     : calculation.needed <= 0 ? "0.0 / 20" : calculation.needed > 20 ? "Más de 20" : `${calculation.needed.toFixed(1)} / 20`;
   card.querySelector(".completion-label").textContent = `${calculation.completedWeight}% evaluado`;
   card.querySelector(".passing-label").textContent = `Apruebas con ${subject.passingGrade}/20`;
-  card.querySelector(".honor-grade-input").value = subject.honorGrade;
+  card.querySelector(".honor-grade-input").value = subject.honorGrade ?? "";
   const honorLabel = card.querySelector(".honor-setting span");
-  honorLabel.textContent = calculation.currentPoints >= subject.honorGrade
+  honorLabel.textContent = subject.honorGrade !== null && calculation.currentPoints >= subject.honorGrade
     ? "★ Cuadro de honor desde"
     : "Cuadro de honor desde";
   card.querySelector(".progress-bar").style.width = `${Math.min(100, calculation.completedWeight)}%`;
@@ -205,7 +207,9 @@ function render() {
     card.querySelector(".delete-subject").addEventListener("click", () => removeSubject(subject.id));
     card.querySelector(".add-activity").addEventListener("click", () => addActivity(subject));
     card.querySelector(".honor-grade-input").addEventListener("input", (event) => {
-      subject.honorGrade = Math.max(0, Math.min(20, Number(event.target.value) || 0));
+      subject.honorGrade = event.target.value === ""
+        ? null
+        : Math.max(0, Math.min(20, Number(event.target.value)));
       saveSubjects();
       updateSubjectSummary(subject);
     });
